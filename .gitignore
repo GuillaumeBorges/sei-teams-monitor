@@ -1,0 +1,30 @@
+# Configuração local (contém webhook URL e e-mail — não versionar)
+config.yaml
+
+# Estado da sessão do navegador (contém cookies — NUNCA versionar)
+browser_state.json
+session_cookies.json
+perfil_navegador/
+
+# Banco de dados local de estado
+estado_processos.db
+
+# Logs
+*.log
+scripts/run_windows.log
+sei_monitor.log
+
+# Arquivos de debug gerados pelo debug_inspect.py
+debug_pagina.html
+debug_screenshot.png
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Editor
+.vscode/
+.idea/

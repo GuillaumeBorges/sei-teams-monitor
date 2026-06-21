@@ -1,0 +1,51 @@
+# =========================================================================
+# Configuração da automação SEI -> Teams
+# Copie este arquivo para "config.yaml" e ajuste os valores marcados AJUSTAR.
+# =========================================================================
+
+sei:
+  # URL da tela "Controle de Processos" (lista de processos da unidade) no SEI.
+  # Normalmente algo como: https://SEUDOMINIOSEI/sei/controlador.php?acao=procedimento_controlar
+  url_lista_processos: "AJUSTAR"
+
+  # Pasta onde fica salva a sessão de login (cookies do gov.br/SEI).
+  # Criada/usada pelo setup_login.py. Não precisa existir antes.
+  perfil_navegador: "./perfil_navegador"
+
+monitoramento:
+  # Intervalo entre verificações, em minutos. Configurável conforme pedido.
+  intervalo_minutos: 5
+
+  # true = roda o navegador sem abrir janela (uso normal, em produção).
+  # false = abre janela visível (útil para depurar problemas).
+  headless: true
+
+teams:
+  # URL gerada pelo fluxo do Power Automate (ver README.md -> "Configurando o Power Automate").
+  power_automate_webhook_url: "AJUSTAR"
+
+  # E-mail/UPN da pessoa que deve receber a mensagem no Teams (mesmo da conta Microsoft 365).
+  destinatario_email: "AJUSTAR@orgao.gov.br"
+
+banco:
+  caminho: "./estado_processos.db"
+
+# -------------------------------------------------------------------------
+# Seletores CSS usados para ler a tabela de processos.
+# ESTES VALORES SÃO PLACEHOLDERS. Quase certamente vão precisar de ajuste
+# para a instalação específica do SEI da sua organização (a versão/tema do
+# SEI muda os nomes de classes e IDs). Use "python debug_inspect.py" para
+# inspecionar a página real e calibrar isto junto comigo.
+# -------------------------------------------------------------------------
+seletores:
+  # Seletor de cada linha da tabela de processos.
+  linha_processo: "tr.infraTrClara, tr.infraTrEscura"
+
+  # Seletor (relativo à linha) do link/texto com o número do processo.
+  numero_processo: "a.processoLink"
+
+  # Seletor (relativo à linha) que SÓ existe/aparece quando o processo tem
+  # uma movimentação nova ainda não vista pela unidade (o "negrito"/ícone
+  # de novidade que o SEI mostra na lista). Se este seletor encontrar pelo
+  # menos 1 elemento na linha, consideramos que o processo "tem novidade".
+  indicador_novidade: "td.protocoloSemMarcador img[title*='Processo']"
