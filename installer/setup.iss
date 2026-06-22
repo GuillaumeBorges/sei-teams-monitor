@@ -73,6 +73,8 @@ begin
 end;
 
 function InitializeSetup(): Boolean;
+var
+  ResultCode: Integer;
 begin
   Result := True;
   if not IsPythonInstalled() then begin
@@ -83,7 +85,7 @@ begin
       'Depois de instalar o Python, execute este instalador novamente.',
       mbConfirmation, MB_YESNO) = IDYES then
     begin
-      ShellExec('open', 'https://www.python.org/downloads/', '', '', SW_SHOW, ewNoWait, 0);
+      ShellExec('open', 'https://www.python.org/downloads/', '', '', SW_SHOW, ewNoWait, ResultCode);
     end;
     Result := False;
   end;
