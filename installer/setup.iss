@@ -75,18 +75,18 @@ end;
 function InitializeSetup(): Boolean;
 var
   ResultCode: Integer;
+  Response: Integer;
 begin
   Result := True;
   if not IsPythonInstalled() then begin
-    if MsgBox(
+    Response := MsgBox(
       'Python nao foi encontrado no seu computador.' + #13#10 + #13#10 +
       'Clique em SIM para abrir o site de download do Python.' + #13#10 +
       'Marque "Add Python to PATH" durante a instalacao.' + #13#10 + #13#10 +
       'Depois de instalar o Python, execute este instalador novamente.',
-      mbConfirmation, MB_YESNO) = IDYES then
-    begin
+      mbConfirmation, MB_YESNO);
+    if Response = IDYES then
       ShellExec('open', 'https://www.python.org/downloads/', '', '', SW_SHOW, ewNoWait, ResultCode);
-    end;
     Result := False;
   end;
 end;
