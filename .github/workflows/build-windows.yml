@@ -1,0 +1,96 @@
+name: Build Windows Installer
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Instalar dependencias Python
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Instalar Playwright Chromium
+        run: python -m playwright install chromium --with-deps
+
+      - name: Gerar config.yaml para Viviane
+        env:
+          WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+          SEI_URL: ${{ secrets.SEI_URL }}
+        shell: python
+        run: |
+          import yaml, os
+
+          cfg = {
+              'sei': {
+                  'url_lista_processos': os.environ.get('SEI_URL', 'https://sei.mj.gov.br/sei/controlador.php?acao=procedimento_controlar&infra_sistema=100000100&infra_unidade_atual=110000897'),
+                  'perfil_navegador': './perfil_navegador',
+              },
+              'monitoramento': {
+                  'intervalo_minutos': 5,
+                  'headless': True,
+              },
+              'teams': {
+                  'power_automate_webhook_url': os.environ['WEBHOOK_URL'],
+                  'destinatario_email': 'viviane.chagas@mj.gov.br',
+              },
+              'banco': {'caminho': './estado_processos.db'},
+              'seletores': {
+                  'linha_processo': 'tr.infraTrClara',
+                  'numero_processo': 'a.processoVisualizado',
+                  'indicador_novidade': "img[src*='exclamacao.svg']",
+              },
+          }
+
+          with open('config.yaml', 'w', encoding='utf-8') as f:
+              yaml.dump(cfg, f, allow_unicode=True, default_flow_style=False)
+
+          print("config.yaml gerado para viviane.chagas@mj.gov.br")
+
+      - name: Instalar Inno Setup
+        run: choco install innosetup --no-progress -y
+
+      - name: Compilar instalador .exe
+        run: |
+          $iscc = "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
+          & $iscc installer\setup.iss
+        shell: pwsh
+
+      - name: Publicar instalador como artefato
+        uses: actions/upload-artifact@v4
+        with:
+          name: SEI-Monitor-Setup-Windows
+          path: installer\Output\SEI-Monitor-Setup.exe
+          retention-days: 30
+
+      - name: Criar Release no GitHub (se for tag)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: installer\Output\SEI-Monitor-Setup.exe
+          name: SEI Monitor ${{ github.ref_name }}
+          body: |
+            ### Instalador Windows — SEI Monitor CGTEC
+
+            **Destinatário:** viviane.chagas@mj.gov.br
+            **Intervalo:** 5 minutos
+
+            #### Como instalar
+            1. Baixe o arquivo `SEI-Monitor-Setup.exe`
+            2. Clique duas vezes para instalar
+            3. Siga as instruções na tela (login no SEI)
+            4. Pronto — o monitor roda automaticamente em segundo plano
